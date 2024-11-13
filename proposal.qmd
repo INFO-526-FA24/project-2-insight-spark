@@ -1,0 +1,165 @@
+---
+title: "Unemployment Trends: A State-by-State Analysis of U.S. Labor Market Dynamics (1976-2022)"
+subtitle: ""
+author: 
+  - name: "Insight Spark"
+    affiliations:
+      - name: "College of Information Science, University of Arizona"
+description: "This is project-2 in the INFO-526 course by Dr Anna Leach"
+format:
+  html:
+    code-tools: true
+    code-overflow: wrap
+    code-line-numbers: false
+    embed-resources: true
+editor: visual
+code-annotations: hover
+execute:
+  warning: false
+---
+
+```{r}
+#| label: load-pkgs
+#| message: false
+
+
+```
+
+## Dataset Description
+
+```{r}
+#| label: load-dataset
+#| message: false
+```
+
+::: {style="text-align: justify;"}
+This project uses the ‘Unemployment in America, Per US State’ dataset sourced from <a href="https://www.kaggle.com/datasets/justin2028/unemployment-in-america-per-us-state">Kaggle dataset: Relevant Population Statistics and Employment Rates</a>. It is a historical dataset containing state-wise unemployment statistics across the United States from 1976 to 2022 with nearly five decades of labor market trends. The data includes key economic indicators such as the total civilian labor force, employment, and unemployment rates for each state, which gives a detailed analysis of regional disparities, economic recessions, and the impact of global crises on state economies. The dataset has been compiled from publicly available government labor reports and is continuously updated to reflect the latest trends in U.S. employment.
+
+</br>The dataset contains 11 columns. The numerical columns: FIPS_Code, Year, Month, Percent_of_State_Areas_Population, Percent_of_Labor_Force_Employed_in_State_Area, and Percent_of_Labor_Force_Unemployed_in_State_Area are represented by the numeric data type in R. The categorical columns: State_Area, Total_Civilian_Non_Institutional_Population_in_State_Area, Total_Civilian_Labor_Force_in_State_Area, Total_Employment_in_State_Area, and Total_Unemployment_in_State_Area are represented by the character data type in R. The dataset has 11 variables and 29,892 entries, indicating a dimension of 29,892 x 11.
+
+A brief description of the columns is as follows:
+
+**FIPS_Code:** An integer representing the Federal Information Processing Standards code for the state or area.
+
+**State_Area:** The name of the state or area.
+
+**Year:** The year the data was recorded.
+
+**Month:** The month the data was recorded.
+
+**Total_Civilian_Non_Institutional_Population_in_State_Area:** The total civilian non-institutional population in the state area.
+
+**Total_Civilian_Labor_Force_in_State_Area:** The total civilian labor force in the state area.
+
+**Percent_of_State_Areas_Population:** The percentage of the state area population that is part of the civilian labor force.
+
+**Total_Employment_in_State_Area:** The total number of people employed in the state area.
+
+**Percent_of_Labor_Force_Employed_in_State_Area:** The percentage of the labor force that is employed in the state area.
+
+**Total_Unemployment_in_State_Area:** The total number of unemployed people in the state area.
+
+**Percent_of_Labor_Force_Unemployed_in_State_Area:** The percentage of the labor force that is unemployed in the state area.
+:::
+
+**Modifying Column Names**
+
+```{r}
+
+data <- read.csv("./dataset/Unemployment in America Per US State.csv")
+
+
+data_copy <- data
+
+# Rename columns: 
+# - Remove '-', 's', '%', replace spaces with '_', and replace '.' with '_'
+colnames(data_copy) <- gsub("-", "", colnames(data_copy))            # Remove '-'
+colnames(data_copy) <- gsub("'s", "", colnames(data_copy))           # Remove 's
+colnames(data_copy) <- gsub("%", "", colnames(data_copy))            # Remove '%'
+colnames(data_copy) <- gsub("\\.", "_", colnames(data_copy))         # Replace dots with underscores
+colnames(data_copy) <- gsub(" ", "_", colnames(data_copy))           # Replace spaces with '_'
+
+# Replace multiple underscores with a single underscore
+colnames(data_copy) <- gsub("_+", "_", colnames(data_copy))
+
+# Replace "_s" with just "s"
+colnames(data_copy) <- gsub("_s", "s", colnames(data_copy))
+
+# Check the cleaned column names
+print(colnames(data_copy))
+
+# Save the modified dataset as a CSV file
+write.csv(data_copy, "./dataset/data.csv", row.names = FALSE)
+
+```
+
+**Summary Statistics**
+
+```{r}
+data <- read.csv("./dataset/data.csv")
+
+dataset_dim <- dim(data)
+
+# column types
+column_types <- sapply(data, class)
+
+# summary statistics for numerical columns
+numerical_summary <- summary(data)
+
+# first few rows of the dataset
+first_rows <- head(data)
+
+# results
+print(dataset_dim)
+print(column_types)
+print(numerical_summary)
+print(first_rows)
+
+```
+
+## Reasons for choosing the dataset
+
+::: {style="text-align: justify;"}
+Unemployment is a critical indicator of economic health, and analyzing its patterns across states and over time provides valuable insights into the resilience and challenges faced by different regions in the U.S. This dataset allows us to explore the dynamics of labor force participation and economic stability.
+
+-   **Diverse Variables**: The dataset includes a rich mix of numerical (like total employment, unemployment rate) and categorical (like state, year, month) variables, making it ideal for analyzing both temporal and geographic trends in employment.
+
+-   **Historical Depth**: Covering U.S. unemployment data since 1976, this dataset allows us to examine long-term trends and analyze responses to major economic events like the 2008 financial crisis and the COVID-19 pandemic.
+
+-   **Distinct Questions**: The dataset supports clear and distinct research questions, such as identifying which states are most impacted during economic downturns and exploring variations in unemployment trends by geographic region.
+
+-   **National Significance**: Unemployment data is highly relevant to policymakers, economists, and citizens. Insights gained from this dataset provide a deeper understanding of regional economic stability across the U.S., making this analysis broadly significant.
+
+-   **Visualization Potential**: This dataset is well-suited for compelling visualizations, such as time series and choropleth maps, which can clearly communicate unemployment trends over time and across states.
+:::
+
+## Research Question
+
+How has the unemployment rate in each U.S. state fluctuated over time, and what are the trends during significant economic events (e.g., the 2008 financial crisis, the COVID-19 pandemic)? Which states display higher resilience or vulnerability in unemployment trends?
+
+## Analysis plan
+
+To answer this, we will utilize the state, year, month, and unemployment rate variables. A **line plot** will visualize the unemployment rate trends over time for each state, highlighting major economic events. Additionally, we will use an **animated choropleth map** to show geographic shifts in unemployment rates across the U.S., making it easy to observe state-by-state variations and patterns.
+
+To comprehensively address this question, we'll focus on both temporal and geographical aspects of unemployment trends. We will analyze how unemployment rates have varied across states over the years, highlighting notable fluctuations during critical economic events.
+
+1.  **Data Preparation:** We plan on taking the unemployment data by year and month to create a time series for each state, ensuring a consistent timeline. This will allow us to detect patterns and seasonality in unemployment rates.
+
+2.  **Exploratory Data Analysis:** Calculate summary statistics such as mean, median, and standard deviation of unemployment rates for each state and year to understand the typical values and range of variation. Outlier detection will also be done on this data set.
+
+3.  **Data Visualization:** Creating an animated choropleth map that displays unemployment rates by state for each month or year. The color scale will represent the unemployment rate, with darker colors indicating higher unemployment. This will provide a powerful representation of regional patterns in unemployment. Viewers will be able to see which states or regions are hit harder during recessions, offering insights into regional economic resilience.
+
+    Weekly Plan
+
+|  |  |  |  |  |  |  |
+|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+| Sr No | Task Name | Status | Assignee | Due | Priority | Summary |
+| 1 | Project proposal | In Progress | All | Sep-18 | High | Write project proposal along with questions to be answered. Also complete peer review of other teams |
+| 2 | Review feedback and prepare presentation | Pending | All | Sep-25 | High | Based on the received feedback, make required changes in the proposal and questions. Start with presenation as well |
+| 3 | Question 1 - Problem statement and code | Pending | Rony, Nithin | Oct-02 | High | Prepare detailed explanation of what Question 1 is going to be, what columns are required and what we can conclude from the question. Based on what is to be answered, start writing code. Get it reviewed from other team members and push the changes |
+| 4 | Question 2 - Problem statement and code | Pending | Kapil, Nithin | Oct-02 | High | Prepare detailed expalantion of what Question 2 is going to be, what columns are required and what we can conclude from the question. Based on what is to be answered, start writing code. Get it reviewed from other team members and push the changes |
+| 5 | Question 1 - Review | Pending | Disha, Sharan | Oct-09 | Moderate | Review the code written by other 2 members and suggest changes |
+| 6 | Question 2 - Review | Pending | Rony, Nithin | Oct-09 | Moderate | Review the code written by other 2 members and suggest changes |
+| 7 | Final code changes and write up | Pending | All | Oct-16 | High | Make final changes in your respective codes, push them, and prepare final write up |
+
+: **Work Schedule**
