@@ -149,17 +149,14 @@ To comprehensively address this question, we'll focus on both temporal and geogr
 
 3.  **Data Visualization:** Creating an animated choropleth map that displays unemployment rates by state for each month or year. The color scale will represent the unemployment rate, with darker colors indicating higher unemployment. This will provide a powerful representation of regional patterns in unemployment. Viewers will be able to see which states or regions are hit harder during recessions, offering insights into regional economic resilience.
 
-    Weekly Plan
+    **Weekly Plan**
 
 |  |  |  |  |  |  |  |
 |-----------|-----------|-----------|-----------|-----------|-----------|-----------|
 | Sr No | Task Name | Status | Assignee | Due | Priority | Summary |
-| 1 | Project proposal | In Progress | All | Sep-18 | High | Write project proposal along with questions to be answered. Also complete peer review of other teams |
-| 2 | Review feedback and prepare presentation | Pending | All | Sep-25 | High | Based on the received feedback, make required changes in the proposal and questions. Start with presenation as well |
-| 3 | Question 1 - Problem statement and code | Pending | Rony, Nithin | Oct-02 | High | Prepare detailed explanation of what Question 1 is going to be, what columns are required and what we can conclude from the question. Based on what is to be answered, start writing code. Get it reviewed from other team members and push the changes |
-| 4 | Question 2 - Problem statement and code | Pending | Kapil, Nithin | Oct-02 | High | Prepare detailed expalantion of what Question 2 is going to be, what columns are required and what we can conclude from the question. Based on what is to be answered, start writing code. Get it reviewed from other team members and push the changes |
-| 5 | Question 1 - Review | Pending | Disha, Sharan | Oct-09 | Moderate | Review the code written by other 2 members and suggest changes |
-| 6 | Question 2 - Review | Pending | Rony, Nithin | Oct-09 | Moderate | Review the code written by other 2 members and suggest changes |
-| 7 | Final code changes and write up | Pending | All | Oct-16 | High | Make final changes in your respective codes, push them, and prepare final write up |
-
-: **Work Schedule**
+| 1 | Project proposal | In Progress | Rony, Disha | Nov 13 | High | Based on the received feedback, make required changes in the proposal and questions |
+| 2 | Data Cleaning and Preprocessing | Pending | Sharan, Nithin | Nov 16 | Moderate | Clean and preprocess data to ensure uniformity and handle missing values. |
+| 3 | Data Analysis | Pending | Rony, Disha | Nov 21 | High | Analyze data to identify correlations and trends. |
+| 4 | Visualization | Pending | Sharan, Nithin | Nov 24 | High | Create visualizations for findings, including correlation graphs. |
+| 5 | Documentation and Final Report | Pending | All | Nov 30 | High | Compile the results and summarize findings, include package documentation. |
+| 6 | Final code changes and write up | Pending | All | Dec 3 | High | Make final changes in your respective codes, push them, and prepare final write up |
