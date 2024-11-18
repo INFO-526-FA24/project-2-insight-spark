@@ -35,7 +35,11 @@ execute:
 ::: {style="text-align: justify;"}
 This project uses the ‘Unemployment in America, Per US State’ dataset sourced from <a href="https://www.kaggle.com/datasets/justin2028/unemployment-in-america-per-us-state">Kaggle dataset: Relevant Population Statistics and Employment Rates</a>. It is a historical dataset containing state-wise unemployment statistics across the United States from 1976 to 2022 with nearly five decades of labor market trends. The data includes key economic indicators such as the total civilian labor force, employment, and unemployment rates for each state, which gives a detailed analysis of regional disparities, economic recessions, and the impact of global crises on state economies. The dataset has been compiled from publicly available government labor reports and is continuously updated to reflect the latest trends in U.S. employment.
 
-</br>The dataset contains 11 columns. The numerical columns: FIPS_Code, Year, Month, Percent_of_State_Areas_Population, Percent_of_Labor_Force_Employed_in_State_Area, and Percent_of_Labor_Force_Unemployed_in_State_Area are represented by the numeric data type in R. The categorical columns: State_Area, Total_Civilian_Non_Institutional_Population_in_State_Area, Total_Civilian_Labor_Force_in_State_Area, Total_Employment_in_State_Area, and Total_Unemployment_in_State_Area are represented by the character data type in R. The dataset has 11 variables and 29,892 entries, indicating a dimension of 29,892 x 11.
+</br>The dataset contains 11 columns.
+
+The numerical columns: FIPS_Code, Year, Month, Percent_of_State_Areas_Population, Percent_of_Labor_Force_Employed_in_State_Area, and Percent_of_Labor_Force_Unemployed_in_State_Area are represented by the numeric data type in R.
+
+The categorical columns: State_Area, Total_Civilian_Non_Institutional_Population_in_State_Area, Total_Civilian_Labor_Force_in_State_Area, Total_Employment_in_State_Area, and Total_Unemployment_in_State_Area are represented by the character data type in R. The dataset has 11 variables and 29,892 entries, indicating a dimension of 29,892 x 11.
 
 A brief description of the columns is as follows:
 
@@ -135,19 +139,36 @@ Unemployment is a critical indicator of economic health, and analyzing its patte
 
 ## Research Question
 
-How has the unemployment rate in each U.S. state fluctuated over time, and what are the trends during significant economic events (e.g., the 2008 financial crisis, the COVID-19 pandemic)? Which states display higher resilience or vulnerability in unemployment trends?
+1.  **How have unemployment trends varied among U.S. states over the years, especially during significant economic events?** Which states displayed higher resilience, and what trends characterize vulnerable states?
+2.  **What trends can be seen in the unemployment rates of different states over time?** How do these trends correlate with significant economic events?
 
-## Analysis plan
+## Specific Analysis Steps
 
 To answer this, we will utilize the state, year, month, and unemployment rate variables. A **line plot** will visualize the unemployment rate trends over time for each state, highlighting major economic events. Additionally, we will use an **animated choropleth map** to show geographic shifts in unemployment rates across the U.S., making it easy to observe state-by-state variations and patterns.
 
 To comprehensively address this question, we'll focus on both temporal and geographical aspects of unemployment trends. We will analyze how unemployment rates have varied across states over the years, highlighting notable fluctuations during critical economic events.
 
-1.  **Data Preparation:** We plan on taking the unemployment data by year and month to create a time series for each state, ensuring a consistent timeline. This will allow us to detect patterns and seasonality in unemployment rates.
+1.  **Data Preparation:**
 
-2.  **Exploratory Data Analysis:** Calculate summary statistics such as mean, median, and standard deviation of unemployment rates for each state and year to understand the typical values and range of variation. Outlier detection will also be done on this data set.
+    -   We plan on taking the unemployment data by year and month to create a time series for each state, ensuring a consistent timeline. This will allow us to detect patterns and seasonality in unemployment rates.
 
-3.  **Data Visualization:** Creating an animated choropleth map that displays unemployment rates by state for each month or year. The color scale will represent the unemployment rate, with darker colors indicating higher unemployment. This will provide a powerful representation of regional patterns in unemployment. Viewers will be able to see which states or regions are hit harder during recessions, offering insights into regional economic resilience.
+    -   Handle missing values using imputation techniques wherever feasible. (Eg. Median imputation for numeric values), or remove incomplete records as appropriate.
+
+2.  **Exploratory Data Analysis (EDA):**
+
+    -   Calculate **summary statistics** such as mean, median, and standard deviation of unemployment rates for each state and year to understand the typical values and range of variation.
+
+    <!-- -->
+
+    -   **Outlier detection:** Identify unusual values that could indicate anomalies or key economic shifts during specific periods.
+
+3.  **Data Visualization:**
+
+    -   **Line Plots**: Visualize unemployment rate trends over time for each state to identify temporal changes.
+
+    -   Creating an **animated choropleth map** that displays unemployment rates by state for each month or year. The color scale will represent the unemployment rate, with darker colors indicating higher unemployment. This will provide a powerful representation of regional patterns in unemployment. Viewers will be able to see which states or regions are hit harder during recessions, offering insights into regional economic resilience.
+
+    -   **Statistical Methods**: Use **Regression Analysis** to determine correlations between economic indicators and unemployment rates, and **Clustering** to group states with similar unemployment behaviors.
 
     **Weekly Plan**
 
