@@ -69,16 +69,26 @@ A brief description of the columns is as follows:
 **Modifying Column Names**
 
 ```{r}
-
 data <- read.csv("./dataset/Unemployment in America Per US State.csv")
 
+# Function to clean the values
+clean_value <- function(value) {
+  # If the value is a character string (within quotes), remove commas and spaces
+  if (is.character(value)) {
+    value <- gsub(",", "", value)    # Remove commas
+    value <- gsub(" ", "", value)    # Remove spaces
+  }
+  return(value)
+}
 
+# Apply the clean_value function to each cell in the dataset
 data_copy <- data
+data_copy[] <- lapply(data_copy, function(x) sapply(x, clean_value))
 
-# Rename columns: 
+# Rename columns:
 # - Remove '-', 's', '%', replace spaces with '_', and replace '.' with '_'
 colnames(data_copy) <- gsub("-", "", colnames(data_copy))            # Remove '-'
-colnames(data_copy) <- gsub("'s", "", colnames(data_copy))           # Remove 's
+colnames(data_copy) <- gsub("'s", "", colnames(data_copy))           # Remove 's'
 colnames(data_copy) <- gsub("%", "", colnames(data_copy))            # Remove '%'
 colnames(data_copy) <- gsub("\\.", "_", colnames(data_copy))         # Replace dots with underscores
 colnames(data_copy) <- gsub(" ", "_", colnames(data_copy))           # Replace spaces with '_'
@@ -172,12 +182,12 @@ To comprehensively address this question, we'll focus on both temporal and geogr
 
     **Weekly Plan**
 
-|  |  |  |  |  |  |  |
+|       |                                 |             |                |        |          |                                                                                     |
 |-----------|-----------|-----------|-----------|-----------|-----------|-----------|
-| Sr No | Task Name | Status | Assignee | Due | Priority | Summary |
-| 1 | Project proposal | In Progress | Rony, Disha | Nov 13 | High | Based on the received feedback, make required changes in the proposal and questions |
-| 2 | Data Cleaning and Preprocessing | Pending | Sharan, Nithin | Nov 16 | Moderate | Clean and preprocess data to ensure uniformity and handle missing values. |
-| 3 | Data Analysis | Pending | Rony, Disha | Nov 21 | High | Analyze data to identify correlations and trends. |
-| 4 | Visualization | Pending | Sharan, Nithin | Nov 24 | High | Create visualizations for findings, including correlation graphs. |
-| 5 | Documentation and Final Report | Pending | All | Nov 30 | High | Compile the results and summarize findings, include package documentation. |
-| 6 | Final code changes and write up | Pending | All | Dec 3 | High | Make final changes in your respective codes, push them, and prepare final write up |
+| Sr No | Task Name                       | Status      | Assignee       | Due    | Priority | Summary                                                                             |
+| 1     | Project proposal                | In Progress | Rony, Disha    | Nov 13 | High     | Based on the received feedback, make required changes in the proposal and questions |
+| 2     | Data Cleaning and Preprocessing | Pending     | Sharan, Nithin | Nov 16 | Moderate | Clean and preprocess data to ensure uniformity and handle missing values.           |
+| 3     | Data Analysis                   | Pending     | Rony, Disha    | Nov 21 | High     | Analyze data to identify correlations and trends.                                   |
+| 4     | Visualization                   | Pending     | Sharan, Nithin | Nov 24 | High     | Create visualizations for findings, including correlation graphs.                   |
+| 5     | Documentation and Final Report  | Pending     | All            | Nov 30 | High     | Compile the results and summarize findings, include package documentation.          |
+| 6     | Final code changes and write up | Pending     | All            | Dec 3  | High     | Make final changes in your respective codes, push them, and prepare final write up  |
