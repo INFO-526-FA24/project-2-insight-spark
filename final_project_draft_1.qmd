@@ -1,0 +1,488 @@
+---
+title: "Project"
+format: html
+editor: visual
+---
+
+### Data Cleaning
+
+```{r}
+# Load the dataset
+data <- read.csv("./project-2-insight-spark/dataset/Unemployment in America Per US State.csv")
+
+# Create a copy for modifications
+data_copy <- data
+
+# Rename columns to remove unwanted characters and standardize names
+colnames(data_copy) <- gsub("-", "", colnames(data_copy))
+colnames(data_copy) <- gsub("'s", "", colnames(data_copy))
+colnames(data_copy) <- gsub("%", "", colnames(data_copy))
+colnames(data_copy) <- gsub("\\.", "_", colnames(data_copy))
+colnames(data_copy) <- gsub(" ", "_", colnames(data_copy))
+colnames(data_copy) <- gsub("_+", "_", colnames(data_copy))
+colnames(data_copy) <- gsub("_s", "s", colnames(data_copy))
+
+# Convert relevant columns to numeric
+data_copy$Total_Civilian_Non_Institutional_Population_in_State_Area <- as.numeric(gsub(",", "", data_copy$Total_Civilian_Non_Institutional_Population_in_State_Area))
+data_copy$Total_Civilian_Labor_Force_in_State_Area <- as.numeric(gsub(",", "", data_copy$Total_Civilian_Labor_Force_in_State_Area))
+data_copy$Total_Employment_in_State_Area <- as.numeric(gsub(",", "", data_copy$Total_Employment_in_State_Area))
+data_copy$Total_Unemployment_in_State_Area <- as.numeric(gsub(",", "", data_copy$Total_Unemployment_in_State_Area))
+
+colnames(data_copy) <- c(
+  "FIPS",
+  "State",
+  "Year",
+  "Month",
+  "Civilian_Population",
+  "Labor_Force",
+  "Labor_Force_Percent_Pop",
+  "Employment",
+  "Employment_Percent_Labor",
+  "Unemployment",
+  "Unemployment_Percent_Labor"
+)
+
+# Save the modified dataset
+write.csv(data_copy, "./project-2-insight-spark/dataset/processed_data.csv", row.names = FALSE)
+
+```
+
+### Summary Statistics
+
+```{r}
+# Reload the cleaned dataset
+data_cleaned <- read.csv("./project-2-insight-spark/dataset/processed_data.csv")
+
+# Dataset dimensions
+print(dim(data_cleaned))
+```
+
+```{r}
+# Column data types
+print(sapply(data_cleaned, class))
+```
+
+```{r}
+# Numerical summary statistics
+print(summary(data_cleaned))
+```
+
+```{r}
+# View first few rows
+print(head(data_cleaned))
+```
+
+```{r}
+# Numerical variables
+numerical_vars <- c(
+  "Civilian_Population",
+  "Labor_Force",
+  "Labor_Force_Percent_Pop",
+  "Employment",
+  "Employment_Percent_Labor",
+  "Unemployment",
+  "Unemployment_Percent_Labor"
+)
+
+# Melt data for easier plotting
+library(reshape2)
+library(ggplot2)
+long_data <- melt(data_cleaned[, numerical_vars])
+
+# Plot histogram with density overlays
+ggplot(long_data, aes(x = value)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "steelblue", color = "black", alpha = 0.6) +
+  geom_density(color = "red", size = 1) +
+  facet_wrap(~ variable, scales = "free", ncol = 2) +
+  labs(title = "Distribution of Numerical Variables", x = "Value", y = "Density") +
+  theme_minimal() +
+  theme(strip.text = element_text(size = 10, face = "bold"), axis.text.x = element_text(angle = 45))
+
+```
+
+### Boxplots for Numerical Variables
+
+```{r}
+library(ggplot2)
+library(tidyr)
+
+# Gather numerical columns into long format for easy plotting
+numerical_data <- data_cleaned[, sapply(data_cleaned, is.numeric)]
+long_numerical_data <- gather(data.frame(numerical_data), key = "Variable", value = "Value")
+
+# Create boxplots for numerical variables
+ggplot(long_numerical_data, aes(x = Variable, y = Value)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Boxplot of Numerical Variables", x = "Variables", y = "Values") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+### Individual Boxplots
+
+```{r}
+# Loop through each variable and create individual boxplots
+for (var in colnames(numerical_data)) {
+  # Create a boxplot for the current variable
+  p <- ggplot(data.frame(Value = numerical_data[[var]]), aes(y = Value)) +
+    geom_boxplot(fill = "lightblue") +
+    labs(
+      title = paste("Boxplot of", var),
+      x = "",
+      y = "Value"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
+    )
+  
+  # Print the plot
+  print(p)
+}
+
+```
+
+### Histograms for Distribution
+
+```{r}
+# Create histograms for each numerical variable
+ggplot(long_numerical_data, aes(x = Value)) +
+  geom_histogram(binwidth = 10, fill = "steelblue", color = "white") +
+  facet_wrap(~ Variable, scales = "free") +
+  labs(title = "Distribution of Numerical Variables", x = "Value", y = "Count") +
+  theme_minimal()
+```
+
+```{r}
+# Loop through each numerical variable and create individual histograms
+for (var in colnames(numerical_data)) {
+  # Determine optimal binwidth based on data range
+  data_range <- range(numerical_data[[var]], na.rm = TRUE)
+  bin_width <- (data_range[2] - data_range[1]) / 30  # Divide the range into 30 bins
+  
+  # Create histogram for the current variable
+  p <- ggplot(data.frame(Value = numerical_data[[var]]), aes(x = Value)) +
+    geom_histogram(binwidth = bin_width, fill = "steelblue", color = "white") +
+    labs(
+      title = paste("Histogram of", var),
+      x = var,
+      y = "Count"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+  
+  # Print the plot
+  print(p)
+}
+
+```
+
+### Bar Plot for Categorical Variables
+
+```{r}
+# Convert categorical columns to factors
+categorical_data <- data_cleaned[, sapply(data_cleaned, is.character)]
+long_categorical_data <- gather(data.frame(categorical_data), key = "Variable", value = "Category")
+
+# Bar plot for categorical variables
+ggplot(long_categorical_data, aes(x = Category, fill = Variable)) +
+  geom_bar() +
+  facet_wrap(~ Variable, scales = "free") +
+  labs(title = "Bar Plot of Categorical Variables", x = "Categories", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+
+```
+
+### Correlation Analysis
+
+```{r}
+# Correlation between numerical variables
+numerical_data <- data_cleaned[, sapply(data_cleaned, is.numeric)]
+correlation_matrix <- cor(numerical_data, use = "complete.obs")
+print(correlation_matrix)
+
+```
+
+### Pair Plot for Correlation
+
+```{r}
+library(GGally)
+
+# Customize the upper triangle to show only formatted correlation values
+custom_ggpairs <- ggpairs(
+  numerical_data,
+  title = "Pair Plot of Numerical Variables",
+  upper = list(
+    continuous = wrap("cor", size = 2, stars = FALSE, align_percent = 0.5) # Correlation with clean formatting
+  ),
+  lower = list(
+    continuous = wrap("points", alpha = 0.3) # Scatterplots for the lower triangle
+  ),
+  diag = list(continuous = wrap("densityDiag"))
+)
+
+# Display the customized pair plot
+print(custom_ggpairs)
+
+```
+
+### Correlation Heatmap
+
+```{r}
+# Compute the correlation matrix
+correlation_matrix <- cor(numerical_data, use = "complete.obs")
+
+# Convert the matrix to a long format for ggplot
+correlation_long <- melt(correlation_matrix)
+
+# Create the heatmap
+ggplot(correlation_long, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 3) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0, 
+                       limit = c(-1, 1), space = "Lab", name = "Correlation") +
+  theme_minimal() +
+  labs(title = "Correlation Heatmap of Numerical Variables", x = "", y = "") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
+  )
+```
+
+```{r}
+library(GGally)
+
+
+# Select relevant numerical variables (exclude high cardinality or less meaningful variables)
+key_variables <- c(
+  "Civilian_Population",
+  "Labor_Force",
+  "Employment",
+  "Unemployment",
+  "Employment_Percent_Labor",
+  "Unemployment_Percent_Labor"
+)
+
+# Filter the data for these variables
+numerical_data_subset <- data_cleaned[, key_variables]
+
+# Create the scatterplot matrix
+ggpairs(
+  numerical_data_subset,
+  title = "Scatterplot Matrix: Key Numerical Variables",
+  lower = list(continuous = "smooth"),  # Adds trend lines to scatterplots
+  upper = list(continuous = "cor")      # Displays correlation values
+)
+
+
+
+```
+
+```{r}
+# Aggregate data by year
+yearly_summary <- aggregate(
+  cbind(Employment, Unemployment) ~ Year, 
+  data = data_cleaned, 
+  FUN = sum
+)
+
+# Plot trends
+ggplot(yearly_summary, aes(x = Year)) +
+  geom_line(aes(y = Employment, color = "Employment"), size = 1) +
+  geom_line(aes(y = Unemployment, color = "Unemployment"), size = 1) +
+  labs(title = "Employment and Unemployment Trends Over Years", x = "Year", y = "Counts") +
+  scale_color_manual(values = c("Employment" = "blue", "Unemployment" = "red")) +
+  theme_minimal() +
+  theme(legend.title = element_blank())
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Aggregate data by year
+yearly_summary <- data_cleaned %>%
+  group_by(Year) %>%
+  summarize(
+    Avg_Employment_Percent = mean(Employment_Percent_Labor, na.rm = TRUE),
+    Avg_Unemployment_Percent = mean(Unemployment_Percent_Labor, na.rm = TRUE)
+  )
+
+# Plot Employment Percentage and Unemployment Percentage over the years
+ggplot(yearly_summary, aes(x = Year)) +
+  geom_line(aes(y = Avg_Employment_Percent, color = "Employment Percentage"), size = 1.2) +
+  geom_line(aes(y = Avg_Unemployment_Percent, color = "Unemployment Percentage"), size = 1.2) +
+  labs(
+    title = "Employment and Unemployment Percentages Over the Years",
+    x = "Year",
+    y = "Percentage",
+    color = "Legend"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+  )
+
+```
+
+```{r}
+library(maps)
+library(ggplot2)
+library(dplyr)
+
+# Map data and state-level unemployment
+state_map <- map_data("state")
+
+# Convert state names to lowercase for matching
+data_cleaned$region <- tolower(data_cleaned$State)
+
+# Compute average unemployment percentage for each state over the years
+state_avg_unemployment <- data_cleaned %>%
+  group_by(region) %>%
+  summarize(Avg_Unemployment_Percent = mean(Unemployment_Percent_Labor, na.rm = TRUE))
+
+# Merge average unemployment with map data
+map_data <- merge(state_map, state_avg_unemployment, by = "region")
+
+# Compute state centroids for label placement
+state_centroids <- aggregate(cbind(long, lat) ~ region, data = map_data, FUN = mean)
+
+# Merge centroids with average unemployment data
+state_centroids <- merge(state_centroids, state_avg_unemployment, by = "region")
+
+# Choropleth map with average unemployment labels
+ggplot(map_data, aes(x = long, y = lat, group = group, fill = Avg_Unemployment_Percent)) +
+  geom_polygon(color = "white") +
+  geom_text(data = state_centroids, aes(x = long, y = lat, label = round(Avg_Unemployment_Percent, 1)), 
+            inherit.aes = FALSE, color = "black", size = 3) + # Add labels with average values
+  #scale_fill_gradient(low = "lightblue", high = "red", name = "Avg Unemployment (%)") +
+  scale_fill_viridis_c(option = "plasma", name = "Avg Unemployment (%)") + # Use Viridis "plasma" color scheme
+  theme_void() +
+  labs(title = "Average Unemployment Rates Across States") +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
+  )
+```
+
+```{r}
+# Aggregate data by year and state
+state_year_summary <- aggregate(
+  Employment_Percent_Labor ~ State + Year,
+  data = data_cleaned, 
+  FUN = mean
+)
+
+# Plot trends for select states
+selected_states <- c("California", "Texas", "New York", "Florida")
+
+ggplot(state_year_summary[state_year_summary$State %in% selected_states, ], 
+       aes(x = Year, y = Employment_Percent_Labor, color = State)) +
+  geom_line(size = 1) +
+  labs(title = "Employment Trends for Selected States",
+       x = "Year",
+       y = "Employment Rate (%)") +
+  theme_minimal()
+```
+
+```{r}
+# Aggregate data by year and state
+state_year_summary <- aggregate(
+  Unemployment_Percent_Labor	 ~ State + Year,
+  data = data_cleaned, 
+  FUN = mean
+)
+
+# Plot trends for select states
+selected_states <- c("California", "Texas", "New York", "Florida")
+ggplot(state_year_summary[state_year_summary$State %in% selected_states, ], 
+       aes(x = Year, y = Unemployment_Percent_Labor, color = State)) +
+  geom_line(size = 1) +
+  labs(title = "Unemployment Trends for Selected States", x = "Year", y = "Unemployment Rate (%)") +
+  theme_minimal()
+
+```
+
+### Line Plot: State-wise Unemployment Trends
+
+```{r}
+library(ggplot2)
+
+# Line plot of unemployment trends for a single state as an example
+ggplot(data_cleaned[data_cleaned$State == "California", ], aes(x = Year, y = Unemployment_Percent_Labor, color = factor(Month))) +
+  geom_line() +
+  labs(title = "Unemployment Trends in California", x = "Year", y = "Unemployment Rate (%)") +
+  theme_minimal()
+
+```
+
+### Regression Analysis
+
+```{r}
+# Linear regression example: Unemployment rate vs Year
+model <- lm(Unemployment_Percent_Labor ~ Year + State, data = data_cleaned)
+summary(model)
+
+```
+
+```{r}
+library(cluster)
+
+# Prepare data for clustering
+state_means <- aggregate(Unemployment_Percent_Labor ~ State, data = data_cleaned, FUN = mean)
+state_clusters <- kmeans(state_means[, -1], centers = 3)
+
+# Add cluster labels to the data
+state_means$Cluster <- factor(state_clusters$cluster)
+
+# Visualize clusters
+ggplot(state_means, aes(x = State, y = Unemployment_Percent_Labor, color = Cluster)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "Clusters of States by Unemployment Trends", x = "State", y = "Average Unemployment Rate")
+
+```
+
+### Animated Choropleth
+
+```{r}
+library(ggplot2)
+library(gganimate)
+library(maps)
+library(gifski)
+library(av)
+
+# Merge with map data
+usa_map <- map_data("state")
+data_cleaned$region <- tolower(data_cleaned$State)
+merged_data <- merge(usa_map, data_cleaned, by = "region")
+
+# Create an animated choropleth map
+animated_map <- ggplot(merged_data, aes(long, lat, group = group, fill = Unemployment_Percent_Labor)) +
+  geom_polygon(color = "white") +
+  coord_fixed(1.3) +
+  scale_fill_gradient(low = "blue", high = "red") +
+  theme_void() +
+  labs(fill = "Unemployment Rate (%)", title = "Unemployment Rates by State: {frame_time}") +
+  transition_time(Year) +
+  ease_aes('linear')
+
+#animate(animated_map, nframes = 100, fps = 10, renderer = gifski_renderer("unemployment_choropleth.gif"))
+#animate(animated_map, nframes = 100, fps = 10, renderer = av_renderer("unemployment_choropleth.mp4"))
+
+```
+
+::: center
+\![Animated Choropleth\](unemployment_choropleth.gif)
+:::
+
+::: <video controls width="800">
+
+<source src="unemployment_choropleth.mp4" type="video/mp4">
+
+Your browser does not support the video tag. </video> :::
