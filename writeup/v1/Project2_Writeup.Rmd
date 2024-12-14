@@ -1,0 +1,558 @@
+---
+title: "INFO 526 Project 2 - How Unemployment in U.S Has Evolved Over Time"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+date: "2024-12-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Team - Insight Spark
+
+Members - Rony, Disha, Sharan, Nithin
+
+Course - INFO 526 Data Analysis and Visualization
+
+Instructor - Prof. Anna Leach
+
+Term - Fall 2024
+
+\par\vspace{3cm}
+
+## 1. Introduction
+
+This project analyzes a comprehensive dataset that tracks unemployment trends across the United States from 1976 to 2022, offering month-wise data for each state. The dataset includes several key columns: FIPS (Federal Information Processing Standards code), State, Year, Month, Civilian Population, Labor Force, Labor Force Percentage, Employment, Employment Percentage of Labor, Unemployment, and Unemployment Percentage of Labor. Monitoring unemployment rates is crucial as it serves as an important economic indicator, reflecting the health of the economy, labor market dynamics, and helping policymakers make informed decisions. This study not only delves into the national and state-specific unemployment trends but also highlights key historical events that shaped the labor market. We investigate the impact of major economic downturns such as the 1980s recession, the dot-com bubble burst, the 2008 financial crisis, and the 2019 COVID-19 pandemic. Additionally, we explore periods of economic growth, including the rise of the tech industry in California during the 1980s and 1990s, and Washington in the 2000s, when employment rates soared due to industry innovations and expansions.
+
+\par\vspace{3cm}
+Question 1: How have unemployment trends varied among U.S. states over the years, especially during significant economic events?
+
+## Key Trends for Rise in Unemployment
+
+![](dumps/1.png)
+
+The line graph above illustrates the national unemployment rate from 1976 to 2022, highlighting several key events that led to significant rises in unemployment. These trends correspond to major economic downturns and crises that had a profound impact on the labor market.
+
+**1980s Recession:** This period is marked by a sharp increase in unemployment, as the U.S. faced a severe economic downturn caused by high inflation and interest rates. The rate peaked significantly during this time, reflecting widespread job losses.
+
+**1990-1991 Recession:** Another notable rise in unemployment occurred during this time, driven by a combination of factors including the Gulf War, reduced consumer spending, and tight monetary policies. The unemployment rate spiked again as the economy struggled to recover.
+
+**Dot-Com Bubble Burst (2000):** The burst of the dot-com bubble in the early 2000s led to widespread layoffs, particularly in the technology sector. This resulted in a temporary but significant rise in unemployment, especially in areas heavily dependent on the tech industry.
+
+**2008 Financial Crisis:** The global financial crisis had a devastating impact on the U.S. economy, leading to one of the most severe recessions in modern history. Unemployment rates soared as banks collapsed, credit markets froze, and businesses downsized or shuttered.
+
+**COVID-19 Pandemic (2020):** The COVID-19 pandemic caused an unprecedented spike in unemployment as businesses across the country were forced to close or operate at reduced capacity. This surge in job losses led to the highest unemployment rate in recent history, though it was followed by a relatively quick recovery as the economy reopened.
+
+These key trends provide valuable insights into the cyclical nature of the labor market and highlight the vulnerability of employment to major global and national events.
+
+\par\vspace{3cm}
+
+## Average Unemployment Rates Across States
+
+![](images/clipboard-1002221531.png)
+
+The map above visualizes the average unemployment rates across different U.S. states. It highlights significant regional variations, with states like South Dakota and North Dakota displaying lower unemployment rates, while states like California, Nevada, and Michigan show higher rates. These patterns are influenced by various factors, such as the size of the state’s economy, its population, and the sectors that drive employment.
+
+It is important to note that this map might be misleading in some cases. For example, while South Dakota and North Dakota have low unemployment rates, these states also have smaller populations and fewer job opportunities, which can result in lower employment numbers. On the other hand, California has a higher unemployment rate but a much larger population. When large-scale events like the COVID-19 pandemic affect the economy, states with bigger populations and industries, like California, are more likely to experience a sharper increase in unemployment rates compared to smaller states.
+
+This underscores the complexity of interpreting unemployment data, population size, industry diversity, and the impact of national events can all skew the representation of unemployment rates.
+
+\par\vspace{3cm}
+
+## Unemployment Volatility, Average Unemployment, and Population
+
+![](images/clipboard-2161737643.png)
+
+The map above shows the relationship between unemployment volatility, average unemployment rates, and population size across U.S. states. Here, bubble size represents the volatility of unemployment rates, and the color of the bubble corresponds to the average unemployment rate, while the background shading indicates state population.
+
+From the map, we observe that states like South Dakota have a relatively small bubble, which indicates that unemployment volatility is low in these states. This suggests that South Dakota's unemployment rate tends to be more stable over time, with fewer fluctuations. On the other hand, larger bubbles, seen in states such as California, New York, and Texas, indicate higher unemployment volatility. These states are more significantly affected by economic shifts and external factors like industry changes, natural disasters, and major events like the COVID-19 pandemic.
+
+**Key Points:**
+
+**South Dakota** shows low volatility, suggesting a more stable economy in terms of employment, which may be due to the state's smaller population and a more concentrated economy.
+
+**California, New York, and Texas** have large bubbles, reflecting higher unemployment volatility. This is likely due to these states' larger populations and diverse industries, which experience more substantial changes in employment during economic downturns or global crises (e.g., the pandemic).
+
+The volatility in states with larger populations can also be tied to their reliance on industries that are sensitive to external factors, such as technology in California, finance in New York, and energy in Texas.
+
+In addition to the population size, factors like the state's industrial diversity and economic resilience play crucial roles in determining unemployment volatility. Large, diverse states often have fluctuating job markets, as various sectors can be impacted differently by changes in the national or global economy. For example, when sectors like tourism or manufacturing face downturns, they can cause spikes in unemployment, contributing to increased volatility.
+
+Question 2: What trends can be seen in the unemployment rates of different states over time? How do these trends correlate with significant economic events?
+
+## Notable Trends Responsible for Rise in Unemployment
+
+\par\vspace{3cm}
+
+### Early 1980s Recession: Detailed Explanation
+
+```{r}
+library(tidyverse)
+file_path <- "dataset/processed_data.csv"
+
+data <- read_csv(file_path)
+data_filtered <- data %>%
+  filter(Year >= 1981 & Year <= 1984)
+
+national_avg_monthly <- data_filtered %>%
+  group_by(Year, Month) %>%
+  summarize(National_Unemployment_Avg = mean(Unemployment_Percent_Labor, na.rm = TRUE)) %>%
+  mutate(Date = as.Date(paste(Year, Month, "01", sep = "-")))
+data_1980s <- data %>%
+  filter(Year >= 1980 & Year < 1990)
+
+national_avg_1980s <- mean(data_1980s$Unemployment_Percent_Labor, na.rm = TRUE)
+
+ggplot(national_avg_monthly, aes(x = Date, y = National_Unemployment_Avg)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "red", size = 2) +
+  geom_hline(yintercept = national_avg_1980s, linetype = "dashed", color = "green", size = 1) +
+  labs(
+    title = "National Unemployment Rate (Jan 1981 - Dec 1984) with 1980s Average",
+    subtitle = "Tracking Economic Recovery: Unemployment in the Early 1980s",
+    x = "Month",
+    y = "Unemployment Rate (%)"
+  ) +
+  scale_x_date(
+    date_labels = "%b %Y",
+    date_breaks = "1 month"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    strip.text = element_text(size = 12)
+  )
+
+```
+
+**The 1980s recession** was triggered by a combination of stagflation (high inflation coupled with high unemployment) that began during the **1973 oil crisis** and subsequent economic turbulence. This period saw a sharp increase in oil prices due to OPEC’s control over oil production and supply, which severely disrupted global economies, especially the U.S.
+
+In response to high inflation, the Federal Reserve under Paul Volcker pursued a policy of tight monetary control to reduce inflation by raising interest rates. These high interest rates were aimed at cooling the overheated economy and curbing inflation, but they also led to a reduction in consumer spending and business investment.
+
+**Unemployment peaked at 10.8% in November 1982,** which was the highest rate since the Great Depression. The rise in unemployment was primarily driven by:
+
+High interest rates: To curb inflation, the Fed raised interest rates to historically high levels (**peaking at around 20% in the early 1980s**). This led to a significant reduction in consumer spending and borrowing, particularly in housing and durable goods sectors, which in turn caused a decline in employment.
+
+**Diminished business investment:** High borrowing costs made it more expensive for businesses to invest in new projects, expand, or hire additional workers. As a result, many businesses reduced their workforce, contributing to higher unemployment rates.
+
+**Energy crisis:** The **1973 oil embargo** had already raised energy prices, and although it was somewhat **alleviated in the late 1970s**, energy prices remained high throughout the 1980s. High energy costs exacerbated inflation and further strained businesses and households, leading to layoffs, bankruptcies, and a general contraction in economic activity.
+
+**Global supply shocks:** Rising oil prices, along with increased costs for raw materials, led to higher prices for goods and services across the economy, further contributing to the unemployment rate.
+
+\par\vspace{3cm}
+
+### Unemployment During Dot Com Bubble Burst
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+
+california_data <- data %>%
+  filter(State == "California", Year >= 2000, Year <= 2002) %>%
+  select(State, Year, Month, Unemployment_Percent_Labor)
+
+california_data$Date <- as.Date(paste(california_data$Year, california_data$Month, "01", sep = "-"), format = "%Y-%m-%d")
+
+ggplot(california_data, aes(x = Date, y = Unemployment_Percent_Labor)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "red", size = 2) +
+  labs(title = "California Unemployment Rate (2000-2002) during Dot-com Bubble Burst",
+       x = "Date",
+       y = "Unemployment Percent Labor") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "6 months") 
+```
+
+**Late 1990s:**
+
+Rapid growth of the tech industry in California, especially in Silicon Valley, with many internet-based startups.
+
+Stock market boom, with heavy investments in tech companies.
+
+**March 2000:**
+
+The Dot-com Bubble burst, causing a sharp decline in the stock prices of tech companies.
+
+The Nasdaq stock index, heavily weighted with tech companies, lost about 78% of its value by 2002.
+
+**Early 2001:**
+
+Massive layoffs in the tech sector as companies downsized or shut down.
+
+Unemployment in California starts to rise, particularly in Silicon Valley.
+
+**2001:**
+
+Unemployment rate in California peaks, reaching over 6%.
+
+Many dot-com companies go bankrupt or significantly reduce their workforce (e.g., Cisco, Yahoo, and many startups).
+
+**Late 2001 - Early 2002:**
+
+Continued economic challenges as job losses ripple through other sectors dependent on the tech industry.
+
+The job market becomes more competitive, and the state’s economy slows down significantly.
+
+**2002:**
+
+The unemployment rate remains elevated but starts to stabilize.
+
+California faces slow recovery, but new tech companies (Google, Facebook) begin to emerge as part of the next growth wave.
+
+**Post-2002:**
+
+California begins to recover with new tech innovations, though the economy remains cautious and focused on sustainable growth.
+
+\par\vspace{3cm}
+
+### Michigan: Automotive Industry Crisis
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+michigan_data <- data %>%
+  filter(State == "Michigan", Year >= 2008, Year <= 2009) %>%
+  select(State, Year, Month, Unemployment_Percent_Labor)
+
+michigan_data$Date <- as.Date(paste(michigan_data$Year, michigan_data$Month, "01", sep = "-"), format = "%Y-%m-%d")
+
+ggplot(michigan_data, aes(x = Date, y = Unemployment_Percent_Labor)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "red", size = 2) +
+  labs(title = "Michigan Unemployment Rate (2008-2009) during Automotive Industry Crisis",
+       x = "Date",
+       y = "Unemployment Percent Labor") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "6 months")
+```
+
+**2007:** Early signs of distress in the automotive industry due to declining consumer demand and financial instability.
+
+**2008:** Global financial crisis worsens the situation; Michigan’s unemployment rate begins to rise.
+
+**Dec 2008:** GM and Chrysler request federal bailouts to avoid bankruptcy.
+
+**2008:** Unemployment rate peaks at around 10.6% in Michigan.
+
+**2009:** Continued layoffs in the automotive sector, unemployment rises to 15.3% by mid-year.
+
+**April 2009:** Chrysler files for bankruptcy, later merges with Fiat.
+
+**June 2009:** GM files for bankruptcy and undergoes government-supported restructuring.
+
+**Late 2009:** Job losses spread to other sectors, worsening the overall unemployment situation.
+
+**2010:** The automotive sector starts recovering, but unemployment remains high for years.
+
+\par\vspace{3cm}
+
+### Early 2020: Effect of COVID 19
+
+```{r}
+library(tidyverse)
+
+file_path <- "dataset/processed_data.csv"
+
+data <- read_csv(file_path)
+data_filtered_2020 <- data %>%
+  filter(Year == 2020)
+
+national_avg_monthly_2020 <- data_filtered_2020 %>%
+  group_by(Year, Month) %>%
+  summarize(National_Unemployment_Avg = mean(Unemployment_Percent_Labor, na.rm = TRUE)) %>%
+  mutate(Date = as.Date(paste(Year, Month, "01", sep = "-")))
+
+data_2020s <- data %>%
+  filter(Year >= 2020 & Year < 2030)
+
+national_avg_2020s <- mean(data_2020s$Unemployment_Percent_Labor, na.rm = TRUE)
+
+ggplot(national_avg_monthly_2020, aes(x = Date, y = National_Unemployment_Avg)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "red", size = 2) +
+  geom_hline(yintercept = national_avg_2020s, linetype = "dashed", color = "green", size = 1) +
+  labs(
+    title = "National Unemployment Rate in 2020 with 2020s Average",
+    subtitle = "Tracking Economic Impact: Unemployment in 2020",
+    x = "Month",
+    y = "Unemployment Rate (%)"
+  ) +
+  scale_x_date(
+    date_labels = "%b %Y",
+    date_breaks = "1 month"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    strip.text = element_text(size = 12)
+  )
+```
+
+**Rise in Unemployment (Early 2020):**
+
+**Pandemic Onset:**
+
+The COVID-19 pandemic led to widespread shutdowns across the U.S. in March 2020. State governments enforced social distancing measures and lockdowns to slow the virus’s spread, impacting businesses in many sectors.
+
+As of March 2020, nearly 40 million Americans were under stay-at-home orders, contributing to large-scale disruptions in the economy.
+
+**Mass Layoffs:**
+
+Several industries, particularly hospitality, retail, travel, and entertainment, faced massive layoffs as they either shut down or reduced operations to comply with government mandates.
+
+The leisure and hospitality sector lost nearly 8 million jobs between February and April 2020, accounting for about 40% of all job losses in the first two months of the pandemic.
+
+**Unprecedented Job Losses:**
+
+Unemployment rates spiked to 14.7% in April 2020, the highest level recorded since the Great Depression, as businesses closed or reduced their workforce.
+
+Over 20 million jobs were lost during April alone, highlighting the severity of the economic downturn.
+
+**Temporary Unemployment Surge:**
+
+There was a dramatic increase in the number of initial jobless claims. In the week of April 4, 2020, a record 6.6 million Americans filed for unemployment benefits, surpassing the previous weekly record set during the 2008 financial crisis.
+
+By the end of April 2020, the total number of jobless claims had surpassed 30 million.
+
+**Disruption of Global Supply Chains:**
+
+Global supply chains were disrupted by factory shutdowns, transportation delays, and labor shortages, which affected industries like manufacturing, logistics, and retail.
+
+In April 2020, 47% of small businesses reported disruptions in their supply chains due to the pandemic, leading to further layoffs and furloughs across various sectors.
+
+**Remote Work Transition:**
+
+As many businesses shifted to remote work to continue operations during lockdowns, the workforce began adjusting to new work arrangements.
+
+By May 2020, approximately 42% of the U.S. labor force was working remotely full-time, compared to just 24% in February 2020 before the pandemic.
+
+Sectors that could quickly transition to remote work, like technology, finance, and professional services, saw fewer layoffs compared to industries that required physical presence, such as hospitality and retail.
+
+\par\vspace{3cm}
+
+## Trends for Rise in Employment
+
+Just like unemployment, there have been notable periods where employment surged due to various economic, technological, and societal factors. Below are some key trends that contributed to significant increases in employment over time.
+
+**Trends in California**
+
+```{r}
+library(tidyverse)
+
+data <- read_csv(file_path)
+data_filtered <- data %>%
+  filter(Year >= 1970 & Year <= 1990)
+
+data_ca <- data_filtered %>%
+  filter(State == "California")
+
+national_avg_monthly <- data_filtered %>%
+  group_by(Year, Month) %>%
+  summarize(National_Employment_Avg = mean(Employment_Percent_Labor, na.rm = TRUE)) %>%
+  mutate(Date = as.Date(paste(Year, Month, "01", sep = "-")))
+data_ca_merged <- data_ca %>%
+  select(Year, Month, Employment_Percent_Labor) %>%
+  mutate(Date = as.Date(paste(Year, Month, "01", sep = "-"))) %>%
+  left_join(national_avg_monthly, by = "Date")
+
+ggplot(data_ca_merged) +
+  geom_line(aes(x = Date, y = Employment_Percent_Labor, color = "California"), size = 1) +
+  geom_line(aes(x = Date, y = National_Employment_Avg, color = "National Average"), size = 1) +
+  scale_color_manual(values = c("California" = "blue", "National Average" = "red")) +
+  labs(
+    title = "Employment Rate in California vs National Average (1970-1990)",
+    subtitle = "Rise in Employment Rate in California: A Tech-Driven Transformation (1970-1990)",
+    x = "Year",
+    y = "Employment Rate (%)",
+    color = "Legend"
+  ) +
+  scale_x_date(
+    date_labels = "%b %Y",
+    date_breaks = "6 months"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+```
+
+**California:**
+
+**Silicon Valley Growth:**
+
+Intel (1968): Semiconductor industry leader.
+
+Apple (1976): Revolutionized personal computing.
+
+Hewlett-Packard (HP): Growth in tech hardware.
+
+Sun Microsystems (1982): Key player in tech innovation.
+
+Oracle (1977): Pioneered database software.
+
+**Biotech Industry:**
+
+Genentech (1976): Early biotechnology leader.
+
+Entertainment Industry:
+
+Disney: Growth of media and entertainment.
+
+Hollywood: Continued dominance in film production.
+
+**Tech-Driven Job Creation:**
+
+Cisco (1984): Networking company, significant job growth.
+
+Atari (1972): Early video game industry.
+
+**Trends in Washington**
+
+```{r}
+library(tidyverse)
+
+data <- read_csv(file_path)
+
+
+data_filtered <- data %>%
+  filter(Year >= 1976 & Year <= 2022)
+
+data_wa_yearly <- data_filtered %>%
+  filter(State == "Washington") %>%
+  group_by(Year) %>%
+  summarize(Washington_Employment_Avg = mean(Employment_Percent_Labor, na.rm = TRUE))
+
+national_avg_yearly <- data_filtered %>%
+  group_by(Year) %>%
+  summarize(National_Employment_Avg = mean(Employment_Percent_Labor, na.rm = TRUE))
+
+data_merged <- data_wa_yearly %>%
+  left_join(national_avg_yearly, by = "Year")
+
+ggplot(data_merged) +
+  geom_line(aes(x = Year, y = Washington_Employment_Avg, color = "Washington"), size = 1) +
+  geom_line(aes(x = Year, y = National_Employment_Avg, color = "National Average"), size = 1) +
+  scale_color_manual(values = c("Washington" = "blue", "National Average" = "red")) +
+  labs(
+    title = "Employment Rate in Washington vs National Average (1976-2022)",
+    subtitle = "Rising Above the National Average: The Role of Washington's Tech Economy",
+    x = "Year",
+    y = "Employment Rate (%)",
+    color = "Legend"
+  ) +
+  scale_x_continuous(breaks = seq(1976, 2022, 1)) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+
+
+```
+
+**Microsoft (1975):** Bill Gates and Paul Allen founded Microsoft in Redmond, transforming Washington into a global tech hub.
+
+**Amazon (1994):** Launched in Seattle, Amazon revolutionized e-commerce, cloud computing, and logistics, creating millions of jobs globally.
+
+**Boeing (Headquarters in Seattle until 2001):** Aerospace giant with a long history in Washington, providing high-skilled manufacturing and engineering jobs.
+
+**Nintendo of America (1980):** Expanded its gaming presence in Redmond, boosting tech industry jobs.
+
+**Oracle (1982):** Major influence in tech software, with significant investments in Washington.
+
+**Qualcomm (1998):** Set up operations in Washington, contributing to the tech and telecommunications sector.
+
+**Tableau (2003):** Data visualization software company, headquartered in Seattle, expanding the tech job market.
+
+**Amgen (2007):** Expanded its biotechnology research and manufacturing in Washington state.
+
+**Immunex (1981):** Biotech company acquired by Amgen, adding to Washington’s biotech sector.
+
+**Trends in Massachusetts**
+
+```{r}
+data_filtered <- data %>%
+  filter(Year >= 1976 & Year <= 2022)
+
+data_ma_yearly <- data_filtered %>%
+  filter(State == "Massachusetts") %>% 
+  group_by(Year) %>%
+  summarize(Massachusetts_Employment_Avg = mean(Employment_Percent_Labor, na.rm = TRUE))
+
+national_avg_yearly <- data_filtered %>%
+  group_by(Year) %>%
+  summarize(National_Employment_Avg = mean(Employment_Percent_Labor, na.rm = TRUE))
+
+data_merged <- data_ma_yearly %>%
+  left_join(national_avg_yearly, by = "Year")
+
+ggplot(data_merged) +
+  geom_line(aes(x = Year, y = Massachusetts_Employment_Avg, color = "Massachusetts"), size = 1) +
+  geom_line(aes(x = Year, y = National_Employment_Avg, color = "National Average"), size = 1) +  
+  scale_color_manual(values = c("Massachusetts" = "blue", "National Average" = "red")) + 
+  labs(
+    title = "Employment Rate in Massachusetts vs National Average (1976-2022)",
+    subtitle = "Massachusetts Employment Trends: A Hub for Education and Innovation",
+    x = "Year",
+    y = "Employment Rate (%)",
+    color = "Legend"
+  ) +
+  scale_x_continuous(breaks = seq(1976, 2022, 1)) +  
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1), 
+    plot.subtitle = element_text(hjust = 0.5) 
+  )
+
+
+
+```
+
+**Tech & Innovation:**
+
+Digital Equipment Corporation (DEC) (1957): A pioneer in computing, based in Massachusetts, provided thousands of jobs in the 1980s and 1990s.
+
+Lotus Development Corporation (1982): Founded in Cambridge, known for its software products like Lotus 1-2-3, contributing to the tech boom.
+
+Akamai Technologies (1998): Based in Cambridge, the company played a key role in internet content delivery, creating many tech jobs.
+
+**Biotech & Healthcare:**
+
+Biogen (1978): One of the first biotech firms in the world, based in Cambridge, driving the biotech industry’s growth in Massachusetts.
+
+Genzyme (1981): Another pioneering biotech company, specializing in rare disease treatments, headquartered in Cambridge.
+
+Vertex Pharmaceuticals (1989): Focused on cystic fibrosis treatments, based in Boston, growing Massachusetts’ biotech presence.
+
+Massachusetts General Hospital and Harvard Medical School: These institutions have long been anchors in Massachusetts’ healthcare industry, driving job growth in medicine and research.
+
+**Education & Research:**
+
+MIT (Massachusetts Institute of Technology): As a leading research university, MIT has continuously driven innovation and created jobs in engineering, technology, and entrepreneurship.
+
+Harvard University: Another key academic institution fostering innovation, startups, and scientific research that leads to job growth in tech, education, and healthcare.
+
+Robotics & AI: Boston Dynamics (1992): A leader in robotics, headquartered in Waltham, Massachusetts, driving job growth in robotics and AI sectors.
+
+iRobot (1990): Based in Bedford, Massachusetts, best known for its Roomba robotic vacuum, which has boosted employment in robotics and technology.
+
+\par\vspace{3cm}
+
+## Conclusion
+
+The dataset provided a comprehensive view of unemployment trends across the United States, allowing us to explore various economic fluctuations over time. Throughout this project, we employed a range of data visualization techniques, including line graphs, bar graphs, and box plots, to present our findings effectively. We utilized R libraries such as ggplot2 for creating visualizations and Plotly for interactive charts.
+
+Key trends for the rise in unemployment were influenced by events like the 1980s recession, the 2008 financial crisis, and the impact of the COVID-19 pandemic. These periods saw a significant surge in job losses due to economic downturns, with industries such as hospitality, retail, and travel being hit the hardest.
+
+On the other hand, key trends for the rise in employment rates were driven by economic recoveries, the growth of technology and remote work opportunities, as well as government stimulus programs. States like California, New York, and Texas have consistently seen high levels of employment, though they are also more volatile to economic shifts due to their large populations and economic size. This analysis highlights the dynamic relationship between economic events and employment trends, as well as the importance of monitoring both unemployment and employment rates to understand the broader economic landscape.
